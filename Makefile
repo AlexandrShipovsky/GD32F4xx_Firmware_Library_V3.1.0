@@ -15,6 +15,8 @@ OPT = -Os
 
 #######################################
 # paths
+GCC_PATH=~/CLionProjects/betaflight/tools/gcc-arm-none-eabi-10.3-2021.10/bin/
+
 #######################################
 # Build path
 BUILD_DIR = build
@@ -53,13 +55,20 @@ Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_tli.c \
 Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_trng.c \
 Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_usart.c \
 Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_wwdgt.c \
+Firmware/GD32F4xx_usb_library/driver/Source/drv_usb_core.c \
+Firmware/GD32F4xx_usb_library/driver/Source/drv_usb_dev.c \
+Firmware/GD32F4xx_usb_library/driver/Source/drv_usbd_int.c \
+Firmware/GD32F4xx_usb_library/device/class/cdc/Source/cdc_acm_core.c \
+Firmware/GD32F4xx_usb_library/device/core/Source/usbd_core.c \
+Firmware/GD32F4xx_usb_library/device/core/Source/usbd_enum.c \
+Firmware/GD32F4xx_usb_library/device/core/Source/usbd_transc.c \
 Examples/USB/USB_Device/cdc_acm/src/system_gd32f4xx.c \
 Examples/USB/USB_Device/cdc_acm/src/gd32f4xx_it.c \
 Examples/USB/USB_Device/cdc_acm/src/gd32f4xx_hw.c \
 Examples/USB/USB_Device/cdc_acm/src/app.c
 
 # ASM sources
-ASM_SOURCES = Firmware/CMSIS/GD/GD32F4xx/Source/ARM/startup_gd32f407_427.s
+ASM_SOURCES = Firmware/CMSIS/GD/GD32F4xx/Source/GCC/startup_gd32f407_427.s
 
 
 #######################################
@@ -82,7 +91,8 @@ endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
  
-#######################################
+##########################
+#############
 # CFLAGS
 #######################################
 # cpu
@@ -104,18 +114,24 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_STDPERIPH_DRIVER \
--DGD32F427
-
+-DGD32F427 \
+-DUSE_USB_FS
 
 # AS includes
-AS_INCLUDES = 
+AS_INCLUDES = \
+-IFirmware/CMSIS \
+-IFirmware/CMSIS/GD/GD32F4xx/Include  
 
 # C includes
 C_INCLUDES =  \
 -IFirmware/GD32F4xx_standard_peripheral/Include \
--IFirmware/CMSIS/Include \
--IFirmware/CMSIS/GD/GD32F4xx/Include/ \
+-IFirmware/CMSIS/GD/GD32F4xx/Include \
 -IFirmware/CMSIS \
+-IFirmware/GD32F4xx_usb_library/driver/Include \
+-IFirmware/GD32F4xx_usb_library/ustd/class/cdc \
+-IFirmware/GD32F4xx_usb_library/ustd/common \
+-IFirmware/GD32F4xx_usb_library/device/class/cdc/Include \
+-IFirmware/GD32F4xx_usb_library/device/core/Include \
 -IExamples/USB/USB_Device/cdc_acm/inc
 
 # compile gcc flags
@@ -154,13 +170,13 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
 # list of ASM program objects
-OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.S=.o)))
-vpath %.S $(sort $(dir $(ASM_SOURCES)))
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.o: %.S Makefile | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
