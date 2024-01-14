@@ -10,7 +10,7 @@ TARGET = gd32f427zgt6
 # debug build?
 DEBUG = 1
 # optimization for size
-OPT = -Os
+OPT = -O0
 
 
 #######################################
