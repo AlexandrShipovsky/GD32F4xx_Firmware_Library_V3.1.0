@@ -31,7 +31,6 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
 OF SUCH DAMAGE.
 */
-
 #include "drv_usb_hw.h"
 #include "cdc_acm_core.h"
 
@@ -48,6 +47,20 @@ int main(void)
     usb_gpio_config();
     usb_rcu_config();
     usb_timer_init();
+
+    // LED init
+    /* enable the led clock */
+    rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_GPIOA);
+    /* configure led GPIO port */
+    gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,GPIO_PIN_1);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_1);
+
+    for(uint8_t i = 0;i < 10;i++)
+    {
+        gpio_bit_toggle(GPIOC,GPIO_PIN_1);
+        usb_mdelay(100);
+    }
 
     usbd_init (&cdc_acm,
 #ifdef USE_USB_FS
