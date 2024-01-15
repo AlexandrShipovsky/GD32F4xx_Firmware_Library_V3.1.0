@@ -65,7 +65,7 @@ OF SUCH DAMAGE.
         #define CDC_IN_FRAME_INTERVAL           5    /* Number of frames between IN transfers */
     #endif
 #else
-    #define USB_CDC_DATA_PACKET_SIZE            64   /* Endpoint IN & OUT Packet size */
+    #define USB_CDC_DATA_PACKET_SIZE            256   /* Endpoint IN & OUT Packet size */
     #define CDC_IN_FRAME_INTERVAL               5    /* Number of frames between IN transfers */
 #endif /* USE_USB_HS */
 

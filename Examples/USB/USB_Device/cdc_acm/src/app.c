@@ -33,6 +33,7 @@ OF SUCH DAMAGE.
 */
 #include "drv_usb_hw.h"
 #include "cdc_acm_core.h"
+#include "string.h"
 
 usb_core_driver cdc_acm;
 
@@ -74,13 +75,21 @@ int main(void)
     usb_intr_config();
 
     /* main loop */
+    usb_cdc_handler cdc;
+    uint8_t buf[] = "Hello from K1921BK01T2\n\r";
+
     while (1) {
         if (USBD_CONFIGURED == cdc_acm.dev.cur_status) {
             if (0U == cdc_acm_check_ready(&cdc_acm)) {
-                cdc_acm_data_receive(&cdc_acm);
-            } else {
+                        cdc_acm_data_receive(&cdc_acm);
+                    } else {
+                cdc.receive_length = sizeof(buf);
+                memcpy(&cdc.data,buf,sizeof(buf));
+                cdc_acm.dev.class_data[CDC_COM_INTERFACE] = &cdc;
                 cdc_acm_data_send(&cdc_acm);
+                 }
             }
-        }
+
+        usb_mdelay(1000);
     }
 }
